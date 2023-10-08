@@ -21,7 +21,7 @@ const dictionary = [];
 let requestNum = 0;
 
 function isNumber(word) {
-  let nums = '1234567890';
+  let nums = '1234567890!@#$%^&*()_+-=';
   if (word == null) {
     return false;
   }
