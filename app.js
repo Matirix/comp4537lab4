@@ -20,17 +20,36 @@ class WordDefinition {
 const dictionary = [];
 let requestNum = 0;
 
+function isNumber(word) {
+  let nums = '1234567890';
+  if (word == null) {
+    return false;
+  }
+  for (let i = 0; i < word.length; i++) {
+    if (nums.includes(word[i])) {
+      return true;
+    }
+  }
+}
+
 http.createServer((req, res) => {
     const link = url.parse(req.url, true)
     const query = link.query;
     const pathname = link.pathname;
 
+
     if (pathname.startsWith("/api/definitions/")) {
         let qword = query.word ? query.word : null
         let qdef = query.definition ? query.definition : null
         requestNum++;
+        let wordNum = false;
+        let defNum = false;
+        if (qword != null) {
+          wordNum = isNumber(qword);
+          defNum = isNumber(qdef);
+        }
 
-        if (req.method == 'GET' && qword != null) {
+        if (req.method == 'GET' && qword != null && !wordNum) {
             let found = false;
             dictionary.forEach((word) => {
                 if (word.getWord() == qword) {
@@ -43,7 +62,7 @@ http.createServer((req, res) => {
                 res.writeHead(404, defaultHeader);
                 res.end(JSON.stringify({ error: `Request #${requestNum} Word '${qword}' not found!` }));
             }
-        } else if (req.method == 'POST' && qword != null && qdef != null) {
+        } else if (req.method == 'POST' && qword != null && qdef != null && !wordNum && !defNum) {
             const exists = dictionary.find(word => word.word == qword);
             if (exists !== undefined) {
               res.writeHead(401, defaultHeader);
@@ -56,7 +75,7 @@ http.createServer((req, res) => {
             }
         } else {
             res.writeHead(404, defaultHeader)
-            res.end(JSON.stringify({ error: `Request #${requestNum} Invalid Request, Missing word or definition` }));
+            res.end(JSON.stringify({ error: `Request #${requestNum} Invalid Request, Missing word or definition or number` }));
         }
     } else {
         res.writeHead(404, defaultHeader)
